@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* простая программа игры в крестики-нолики */
+/* РїСЂРѕСЃС‚Р°СЏ РїСЂРѕРіСЂР°РјРјР° РёРіСЂС‹ РІ РєСЂРµСЃС‚РёРєРё-РЅРѕР»РёРєРё */
 #define SPACE 	' '
 #define ROWS	3
 #define COLUMNS 3
@@ -14,11 +14,11 @@ void get_computer_move(char *p, int row, int col);
 
 int main() {
 
-	/* поле для крестиков-ноликов */
+	/* РїРѕР»Рµ РґР»СЏ РєСЂРµСЃС‚РёРєРѕРІ-РЅРѕР»РёРєРѕРІ */
 	char *pole;	
 	pole = malloc(ROWS * COLUMNS * sizeof(char));
 
-	/* результат проверки */
+	/* СЂРµР·СѓР»СЊС‚Р°С‚ РїСЂРѕРІРµСЂРєРё */
 	char done;
 
 	init_pole(&pole, ROWS, COLUMNS);
@@ -29,22 +29,22 @@ int main() {
 	printf("My symbol 'O'.\n");
 	done = SPACE;
 	do {
-		 /* вывод игровой доски */
+		 /* РІС‹РІРѕРґ РёРіСЂРѕРІРѕР№ РґРѕСЃРєРё */
 		disp_pole(&pole, ROWS, COLUMNS);
 
-		/* ходит игрок */
+		/* С…РѕРґРёС‚ РёРіСЂРѕРє */
 		get_player_move(&pole, ROWS, COLUMNS);
 
-		/* проверка на победу */
+		/* РїСЂРѕРІРµСЂРєР° РЅР° РїРѕР±РµРґСѓ */
 		done = check(&pole, ROWS, COLUMNS);
 
 		if (done!=SPACE) 
-			break; /* победитель */
+			break; /* РїРѕР±РµРґРёС‚РµР»СЊ */
 			
-		/* ходит компьютер */		
+		/* С…РѕРґРёС‚ РєРѕРјРїСЊСЋС‚РµСЂ */		
 		get_computer_move(&pole, ROWS, COLUMNS); 
 
-		/* проверка на победу */
+		/* РїСЂРѕРІРµСЂРєР° РЅР° РїРѕР±РµРґСѓ */
 		done = check(&pole, ROWS, COLUMNS);
 	} while(done==SPACE);
 	
@@ -52,12 +52,12 @@ int main() {
 	else 
 		printf("I won!!!!\n");
 
-	/* отображение результирующего положения */
+	/* РѕС‚РѕР±СЂР°Р¶РµРЅРёРµ СЂРµР·СѓР»СЊС‚РёСЂСѓСЋС‰РµРіРѕ РїРѕР»РѕР¶РµРЅРёСЏ */
 	disp_pole(&pole, ROWS, COLUMNS);
 	return 0;
 }
 
-/* ввод хода игрока */
+/* РІРІРѕРґ С…РѕРґР° РёРіСЂРѕРєР° */
 void get_player_move(char *p, int row, int col) {
 	int x, y;
 	char *c;
@@ -82,7 +82,7 @@ void get_player_move(char *p, int row, int col) {
 	}
 }
 
-/* инициализация поля сомволами SPACE */
+/* РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїРѕР»СЏ СЃРѕРјРІРѕР»Р°РјРё SPACE */
 void init_pole(char *p, int row, int col) {
 	register int j,i;
 	char *c;
@@ -95,7 +95,7 @@ void init_pole(char *p, int row, int col) {
 	}
 }
 
-/* печать игрового поля */
+/* РїРµС‡Р°С‚СЊ РёРіСЂРѕРІРѕРіРѕ РїРѕР»СЏ */
 void disp_pole(char *p, int row, int col) {
 	register int r,i;
 	char *c, *u;
@@ -110,7 +110,7 @@ void disp_pole(char *p, int row, int col) {
 	printf("\n");
 }
 
-/* ход компьютера */
+/* С…РѕРґ РєРѕРјРїСЊСЋС‚РµСЂР° */
 void get_computer_move(char *p, int row, int col) {
 	size_t t;
 	for (t=0; *p!=SPACE && t<9; ++t) p++;
@@ -121,31 +121,31 @@ void get_computer_move(char *p, int row, int col) {
 	else *p = 'O';
 }
 
-/* проверка на победу */
+/* РїСЂРѕРІРµСЂРєР° РЅР° РїРѕР±РµРґСѓ */
 char check(char *p, int row, int col) {
 
 	size_t t;
 
-	/* проверка строк */	
+	/* РїСЂРѕРІРµСЂРєР° СЃС‚СЂРѕРє */	
 	for(t=0; t<row; t++) {
 		if ((*(p + t*col)  == *(p+1+ t*col)) && (*(p+ t*col) == *(p+2 + t*col))) {
 			return *(p+t*col);
 		}
 	}
 	
-	/* проверка столбцов */
+	/* РїСЂРѕРІРµСЂРєР° СЃС‚РѕР»Р±С†РѕРІ */
 	for(t=0; t<col; t++) { 
 		if(*(p + t) == *(p+3 + t) && *(p+3+ t)==*(p+6 +t)) {
 			return *(p + t);
 		}
 	}
 
-	/* проверка диагонали \ */
+	/* РїСЂРѕРІРµСЂРєР° РґРёР°РіРѕРЅР°Р»Рё \ */
 	if(*p==*(p+4) && *(p+4)==*(p+8)) {
 		return *p;
 	}
 
-	/* проверка диагонали / */
+	/* РїСЂРѕРІРµСЂРєР° РґРёР°РіРѕРЅР°Р»Рё / */
 	if(*(p+2)==*(p+4) && *(p+4)==*(p+6)) {
 		return *(p+2);
 	}
