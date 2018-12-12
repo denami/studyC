@@ -6,11 +6,12 @@
 #define ROWS	3
 #define COLUMNS 3
 
+
 void disp_pole(char *p, int row, int col);
 void init_pole(char *p, int row, int col);
-char check(char *p, int row, int col);
 void get_player_move(char *p, int row, int col);
 void get_computer_move(char *p, int row, int col);
+void check(char *p, int row, int col, char *result);
 
 int main() {
 
@@ -19,41 +20,44 @@ int main() {
 	pole = malloc(ROWS * COLUMNS * sizeof(char));
 
 	/* результат проверки */
-	char done;
+	char *result;
+	result = malloc(sizeof(char));
+	*result = SPACE;
 
-	init_pole(&pole, ROWS, COLUMNS);
-	disp_pole(&pole, ROWS, COLUMNS);
+	init_pole(pole, ROWS, COLUMNS);
 	
 	printf("You will be playing against the computer.\n");
 	printf("You symbol 'X'.\n");
 	printf("My symbol 'O'.\n");
-	done = SPACE;
+	
 	do {
 		 /* вывод игровой доски */
-		disp_pole(&pole, ROWS, COLUMNS);
+		disp_pole(pole, ROWS, COLUMNS);
 
 		/* ходит игрок */
-		get_player_move(&pole, ROWS, COLUMNS);
+		get_player_move(pole, ROWS, COLUMNS);
 
 		/* проверка на победу */
-		done = check(&pole, ROWS, COLUMNS);
+		check(pole, ROWS, COLUMNS, result);
 
-		if (done!=SPACE) 
-			break; /* победитель */
+
+		/* есть победитель */
+		if(*result != SPACE) 
+			break; 
 			
 		/* ходит компьютер */		
-		get_computer_move(&pole, ROWS, COLUMNS); 
+		get_computer_move(pole, ROWS, COLUMNS); 
 
 		/* проверка на победу */
-		done = check(&pole, ROWS, COLUMNS);
-	} while(done==SPACE);
+		check(pole, ROWS, COLUMNS, result);
+	} while(*result==SPACE);
 	
-	if(done=='X') printf("You won!\n");
+	if(*result=='X') printf("You won!\n");
 	else 
 		printf("I won!!!!\n");
 
 	/* отображение результирующего положения */
-	disp_pole(&pole, ROWS, COLUMNS);
+	disp_pole(pole, ROWS, COLUMNS);
 	return 0;
 }
 
@@ -84,7 +88,7 @@ void get_player_move(char *p, int row, int col) {
 
 /* инициализация поля сомволами SPACE */
 void init_pole(char *p, int row, int col) {
-	register int j,i;
+	size_t j,i;
 	char *c;
 	
 	for (j = 0  ;  j < row; j++) {
@@ -97,13 +101,14 @@ void init_pole(char *p, int row, int col) {
 
 /* печать игрового поля */
 void disp_pole(char *p, int row, int col) {
-	register int r,i;
-	char *c, *u;
+
+	size_t j,i;
+	char *c;
 	
-	for (r = 0  ;  r<row; r++) {
+	for (j = 0  ;  j<row; j++) {
 		for (i = 0 ; i < col; i++){
-			c=(char *)*(p+r*col+i);
-			printf("|%c|",c);
+			c=p+j*col+i;
+			printf("|%c|",*c);
 		}
 		printf("\n");
 	}
@@ -112,7 +117,9 @@ void disp_pole(char *p, int row, int col) {
 
 /* ход компьютера */
 void get_computer_move(char *p, int row, int col) {
+	
 	size_t t;
+	
 	for (t=0; *p!=SPACE && t<9; ++t) p++;
 	if(t==9) {
 		printf("draw\n");
@@ -122,35 +129,33 @@ void get_computer_move(char *p, int row, int col) {
 }
 
 /* проверка на победу */
-char check(char *p, int row, int col) {
+void check(char *p, int row, int col, char *result) {
 
 	size_t t;
 
 	/* проверка строк */	
 	for(t=0; t<row; t++) {
 		if ((*(p + t*col)  == *(p+1+ t*col)) && (*(p+ t*col) == *(p+2 + t*col))) {
-			return *(p+t*col);
+			*result = *(p+t*col);
 		}
 	}
 	
 	/* проверка столбцов */
 	for(t=0; t<col; t++) { 
-		if(*(p + t) == *(p+3 + t) && *(p+3+ t)==*(p+6 +t)) {
-			return *(p + t);
+		if(*(p + t) == *(p+3 + t) && *(p+3+ t)==*(p+6 +t) && *result == SPACE) {
+			*result = *(p + t);
 		}
 	}
 
 	/* проверка диагонали \ */
-	if(*p==*(p+4) && *(p+4)==*(p+8)) {
-		return *p;
+	if(*p==*(p+4) && *(p+4)==*(p+8) && *result == SPACE) {
+		*result = *p;
 	}
 
 	/* проверка диагонали / */
-	if(*(p+2)==*(p+4) && *(p+4)==*(p+6)) {
-		return *(p+2);
+	if(*(p+2)==*(p+4) && *(p+4)==*(p+6) && *result == SPACE) {
+		*result = *(p+2);
 	}
 
-	free(t);
-	return SPACE;
 }
 
