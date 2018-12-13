@@ -6,12 +6,12 @@
 #define ROWS	3
 #define COLUMNS 3
 
-void disp_pole(char *p, int row, int col);
-void init_pole(char *p, int row, int col);
-void get_player_move(char *p, int row, int col);
-void get_computer_move(char *p, int row, int col);
-void check(char *p, int row, int col, char *result);
-void internal_test(char *p, int row, int col, char *result);
+int disp_pole(char *p, int row, int col);
+int init_pole(char *p, int row, int col);
+int get_player_move(char *p, int row, int col);
+int get_computer_move(char *p, int row, int col);
+int check(char *p, int row, int col, char *result);
+int internal_test(char *p, int row, int col, char *result);
 
 int main() {
 
@@ -24,8 +24,11 @@ int main() {
 	result = malloc(sizeof(char));
 	*result = SPACE;
 
-	internal_test(pole, ROWS, COLUMNS, result);
-	
+	if ( internal_test(pole, ROWS, COLUMNS, result) != 0 ) {
+		printf("Internal test failed.\n");
+		exit(4);
+	}
+
 	printf("Press any key.\n");
 	/* Ожидание нажатия клавиши */
 	/* getch() возвращает код нажатой клавиши, но нам важен только факт нажатия */
@@ -46,11 +49,10 @@ int main() {
 		check(pole, ROWS, COLUMNS, result);
 
 		/* есть победитель */
-		if(*result != SPACE) 
-			break; 
+		if(*result != SPACE) break;
 			
 		/* ходит компьютер */
-		get_computer_move(pole, ROWS, COLUMNS); 
+		if ( get_computer_move(pole, ROWS, COLUMNS) != 0 ) break;
 
 		/* проверка на победу */
 		check(pole, ROWS, COLUMNS, result);
@@ -60,8 +62,8 @@ int main() {
 	disp_pole(pole, ROWS, COLUMNS);
 	
 	if(*result=='X') printf("You won!\n");
-	else 
-		printf("I won!!!!\n");
+	else if(*result=='O') printf("I won!\n");
+	else printf("End of game no free cells.\n");
 
 	free(pole);
 	free(result);
@@ -70,7 +72,7 @@ int main() {
 }
 
 /* ввод хода игрока */
-void get_player_move(char *p, int row, int col) {
+int get_player_move(char *p, int row, int col) {
 	int x, y;
 	char *c;
 	printf("_Enter coordinates for your X.\n");
@@ -92,10 +94,11 @@ void get_player_move(char *p, int row, int col) {
 			*c = 'X';
 		}
 	}
+	return 0;
 }
 
 /* инициализация поля сомволами SPACE */
-void init_pole(char *p, int row, int col) {
+int init_pole(char *p, int row, int col) {
 	size_t j,i;
 	char *c;
 	
@@ -105,10 +108,11 @@ void init_pole(char *p, int row, int col) {
 			*c=SPACE;
 		}
 	}
+	return 0;
 }
 
 /* печать игрового поля */
-void disp_pole(char *p, int row, int col) {
+int disp_pole(char *p, int row, int col) {
 
 	size_t j,i;
 	char *c;
@@ -124,10 +128,11 @@ void disp_pole(char *p, int row, int col) {
 		printf("\n");
 	}
 	printf("\n");
+	return 0;
 }
 
 /* ход компьютера */
-void get_computer_move(char *p, int row, int col) {
+int get_computer_move(char *p, int row, int col) {
 
 	size_t t;
 
@@ -139,20 +144,19 @@ void get_computer_move(char *p, int row, int col) {
 	/* Если случано выбранный элемент массива SPACE ставим на нем 'O' и выходим*/
 	if (*(p+rnd) == SPACE ) {
 		*(p+rnd) = 'O';
-		return;
+		return 0;
 	}
 
 	/* если сучайный элемент не SPACE берем первый свободный */
 	for (t=0; *p!=SPACE && t<9; ++t) p++;
 	if(t==9) {
-		printf("draw\n");
-		exit(0); /* End of game */
-	}
-	else *p = 'O';
+		return(3);
+	} else *p = 'O';
+	return 0;
 }
 
 /* проверка на победу */
-void check(char *p, int row, int col, char *result) {
+int check(char *p, int row, int col, char *result) {
 
 	size_t t;
 
@@ -180,10 +184,13 @@ void check(char *p, int row, int col, char *result) {
 		*result = *(p+2);
 	}
 
+	if (*result != 'O' && *result != 'X' && *result != SPACE) return 2;
+	else return 0;
+
 }
 
 /* Функция тестирования функций */
-void internal_test(char *p, int row, int col, char *result) {
+int internal_test(char *p, int row, int col, char *result) {
 
 	printf("Chek init_pole(char *p, int row, int col) function\n");
 	init_pole(p, row, col);
@@ -191,7 +198,7 @@ void internal_test(char *p, int row, int col, char *result) {
 		printf("Chek passed\n");
 	} else {
 		printf("Chek failed\n");
-		exit(1);
+		return 1;
 	}
 
 	init_pole(p, row, col);
@@ -207,7 +214,7 @@ void internal_test(char *p, int row, int col, char *result) {
 		printf("Chek passed\n");
 	} else {
 		printf("Chek failed\n");
-		exit(1);
+		return 1;
 	}
 
 }
