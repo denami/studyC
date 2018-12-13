@@ -6,12 +6,12 @@
 #define ROWS	3
 #define COLUMNS 3
 
-
 void disp_pole(char *p, int row, int col);
 void init_pole(char *p, int row, int col);
 void get_player_move(char *p, int row, int col);
 void get_computer_move(char *p, int row, int col);
 void check(char *p, int row, int col, char *result);
+void internal_test(char *p, int row, int col, char *result);
 
 int main() {
 
@@ -24,14 +24,19 @@ int main() {
 	result = malloc(sizeof(char));
 	*result = SPACE;
 
-	init_pole(pole, ROWS, COLUMNS);
+	internal_test(pole, ROWS, COLUMNS, result);
 	
+	printf("Press any key.\n");
+	/* Ожидание нажатия клавиши */
+	/* getch() возвращает код нажатой клавиши, но нам важен только факт нажатия */
+	getch();
+
+	init_pole(pole, ROWS, COLUMNS);
+
 	printf("You will be playing against the computer.\n");
-	printf("You symbol 'X'.\n");
-	printf("My symbol 'O'.\n");
 	
 	do {
-		 /* вывод игровой доски */
+		/* вывод игровой доски */
 		disp_pole(pole, ROWS, COLUMNS);
 
 		/* ходит игрок */
@@ -40,24 +45,27 @@ int main() {
 		/* проверка на победу */
 		check(pole, ROWS, COLUMNS, result);
 
-
 		/* есть победитель */
 		if(*result != SPACE) 
 			break; 
 			
-		/* ходит компьютер */		
+		/* ходит компьютер */
 		get_computer_move(pole, ROWS, COLUMNS); 
 
 		/* проверка на победу */
 		check(pole, ROWS, COLUMNS, result);
 	} while(*result==SPACE);
+
+	/* отображение результирующего положения */
+	disp_pole(pole, ROWS, COLUMNS);
 	
 	if(*result=='X') printf("You won!\n");
 	else 
 		printf("I won!!!!\n");
 
-	/* отображение результирующего положения */
-	disp_pole(pole, ROWS, COLUMNS);
+	free(pole);
+	free(result);
+
 	return 0;
 }
 
@@ -104,7 +112,10 @@ void disp_pole(char *p, int row, int col) {
 
 	size_t j,i;
 	char *c;
-	
+	system("cls");
+	printf("You symbol 'X'.\n");
+	printf("My symbol 'O'.\n");
+
 	for (j = 0  ;  j<row; j++) {
 		for (i = 0 ; i < col; i++){
 			c=p+j*col+i;
@@ -117,13 +128,25 @@ void disp_pole(char *p, int row, int col) {
 
 /* ход компьютера */
 void get_computer_move(char *p, int row, int col) {
-	
+
 	size_t t;
-	
+
+	/* Задаем "зерно" на основании которого генерируются случайные числа */
+	srand(time(NULL));
+
+	int rnd = rand()%(row*col-1); /* Для получения числа из диапазона от 0 до до максимального элемента массива */
+
+	/* Если случано выбранный элемент массива SPACE ставим на нем 'O' и выходим*/
+	if (*(p+rnd) == SPACE ) {
+		*(p+rnd) = 'O';
+		return;
+	}
+
+	/* если сучайный элемент не SPACE берем первый свободный */
 	for (t=0; *p!=SPACE && t<9; ++t) p++;
 	if(t==9) {
 		printf("draw\n");
-		exit(0); /* game over */
+		exit(0); /* End of game */
 	}
 	else *p = 'O';
 }
@@ -133,7 +156,7 @@ void check(char *p, int row, int col, char *result) {
 
 	size_t t;
 
-	/* проверка строк */	
+	/* проверка строк */
 	for(t=0; t<row; t++) {
 		if ((*(p + t*col)  == *(p+1+ t*col)) && (*(p+ t*col) == *(p+2 + t*col))) {
 			*result = *(p+t*col);
@@ -159,3 +182,32 @@ void check(char *p, int row, int col, char *result) {
 
 }
 
+/* Функция тестирования функций */
+void internal_test(char *p, int row, int col, char *result) {
+
+	printf("Chek init_pole(char *p, int row, int col) function\n");
+	init_pole(p, row, col);
+	if (*p == SPACE ) {
+		printf("Chek passed\n");
+	} else {
+		printf("Chek failed\n");
+		exit(1);
+	}
+
+	init_pole(p, row, col);
+
+	printf("Chek void check(char *p, int row, int col, char *result) function\n");
+
+	char *r;
+	r = malloc(sizeof(char));
+	*r = SPACE;
+	check(p, ROWS, COLUMNS, r);
+
+	if ( *r == SPACE ) {
+		printf("Chek passed\n");
+	} else {
+		printf("Chek failed\n");
+		exit(1);
+	}
+
+}
