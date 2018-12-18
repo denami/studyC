@@ -3,11 +3,12 @@
 
 /* простая программа игры в крестики-нолики */
 #define SPACE 	' '
+#define RESULTS 'Z'
 #define ROWS	3
 #define COLUMNS 3
 
 int disp_pole(char *p, int row, int col);
-int init_pole(char *p, int row, int col);
+int init_pole(char *p, int row, int col, char s);
 int get_player_move(char *p, int row, int col);
 int get_computer_move(char *p, int row, int col);
 int check(char *p, int row, int col, char *result);
@@ -34,7 +35,7 @@ int main() {
 	/* getch() возвращает код нажатой клавиши, но нам важен только факт нажатия */
 	getch();
 
-	init_pole(pole, ROWS, COLUMNS);
+	init_pole(pole, ROWS, COLUMNS, SPACE);
 
 	printf("You will be playing against the computer.\n");
 	
@@ -43,7 +44,7 @@ int main() {
 		disp_pole(pole, ROWS, COLUMNS);
 
 		/* ходит игрок */
-		get_player_move(pole, ROWS, COLUMNS);
+		if (get_player_move(pole, ROWS, COLUMNS) != 0 ) break;
 
 		/* проверка на победу */
 		check(pole, ROWS, COLUMNS, result);
@@ -73,8 +74,19 @@ int main() {
 
 /* ввод хода игрока */
 int get_player_move(char *p, int row, int col) {
+
 	int x, y;
 	char *c;
+	size_t t;
+
+	/* провека достуных ячеек */
+	c=p;
+	for (t=0; *c!=SPACE && t<9; ++t) c++;
+	if(t==9) {
+		printf("No free cells.\n");
+		return 5;
+	}
+
 	printf("_Enter coordinates for your X.\n");
 	printf("_Row? ");
 	scanf("%d", &x);
@@ -97,15 +109,16 @@ int get_player_move(char *p, int row, int col) {
 	return 0;
 }
 
-/* инициализация поля сомволами SPACE */
-int init_pole(char *p, int row, int col) {
+/* инициализация поля сомволами */
+int init_pole(char *p, int row, int col, char s) {
+
 	size_t j,i;
 	char *c;
-	
-	for (j = 0  ;  j < row; j++) {
+
+	for (j = 0 ; j < row; j++) {
 		for (i = 0 ; i < col; i++) {
 			c=p+j*col+i;
-			*c=SPACE;
+			*c=s;
 		}
 	}
 	return 0;
@@ -166,7 +179,7 @@ int check(char *p, int row, int col, char *result) {
 			*result = *(p+t*col);
 		}
 	}
-	
+
 	/* проверка столбцов */
 	for(t=0; t<col; t++) { 
 		if(*(p + t) == *(p+3 + t) && *(p+3+ t)==*(p+6 +t) && *result == SPACE) {
@@ -184,7 +197,11 @@ int check(char *p, int row, int col, char *result) {
 		*result = *(p+2);
 	}
 
-	if (*result != 'O' && *result != 'X' && *result != SPACE) return 2;
+	/* в случае если проверка проходит но строки либо диагонали заполенены символами отличными от опстимых */
+	if (*result != 'O' && *result != 'X' && *result != SPACE) {
+		*result = RESULTS;
+		return 2;
+	}
 	else return 0;
 
 }
@@ -192,19 +209,31 @@ int check(char *p, int row, int col, char *result) {
 /* Функция тестирования функций */
 int internal_test(char *p, int row, int col, char *result) {
 
-	printf("Chek init_pole(char *p, int row, int col) function\n");
-	init_pole(p, row, col);
-	if (*p == SPACE ) {
+	printf("Chek int disp_pole(char *p, int row, int col) function\n");
+	printf("Press any key.\n");
+	getch();
+	init_pole(p, row, col, RESULTS);
+	if ( disp_pole(p, row, col) != 0 ) {
+		printf("Chek failed\n");
+		return 1;
+	} else {
+		printf("Chek passed\n");
+	}
+
+
+	printf("Chek int init_pole(char *p, int row, int col, char s) function\n");
+	init_pole(p, row, col, RESULTS);
+	if ( *p == RESULTS ) {
 		printf("Chek passed\n");
 	} else {
 		printf("Chek failed\n");
 		return 1;
 	}
 
-	init_pole(p, row, col);
+	printf("Chek int check(char *p, int row, int col, char *result) function\n");
+	init_pole(p, row, col, SPACE);
 
-	printf("Chek void check(char *p, int row, int col, char *result) function\n");
-
+	int a;
 	char *r;
 	r = malloc(sizeof(char));
 	*r = SPACE;
@@ -217,4 +246,44 @@ int internal_test(char *p, int row, int col, char *result) {
 		return 1;
 	}
 
+	printf("Chek int get_computer_move(char *p, int row, int col) function\n");
+	init_pole(p, row, col, RESULTS);
+	*p= SPACE;
+	a = get_computer_move(p, row, col);
+	if ( a != 0 || *p != 'O') {
+		printf("Chek failed\n");
+		return 1;
+	} else {
+		printf("Chek passed\n");
+	}
+
+	printf("Chek int get_player_move(char *p, int row, int col) function\n");
+	init_pole(p, row, col, RESULTS);
+	a = get_player_move(p, row, col);
+	if ( a == 0 || *p != RESULTS) {
+		printf("Chek failed\n");
+		return 1;
+	} else {
+		printf("Chek passed\n");
+	}
+
+	printf("Chek int printf(char c) function\n");
+	if ( printf("%c\n", RESULTS) < 0 ) {
+		printf("Chek failed\n");
+		return 1;
+	} else {
+		printf("Chek passed\n");
+	}
+
+	printf("Chek int rand() function\n");
+	srand(time(NULL));
+	if ( rand() != rand() ) {
+		printf("Chek passed\n");
+	} else {
+		printf("Chek failed\n");
+		return 1;
+	}
+
+	free(r);
+	return 0;
 }
